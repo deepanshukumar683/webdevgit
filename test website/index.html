@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRKWebApp | Deepanshu 2026</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #4F46E2;
+            --secondary: #0EA5E9;
+            --accent: #F43F5E;
+            --bg: #F8FAFC;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --text: #0F172A;
+            --text-muted: #64748B;
+            --glass: rgba(255, 255, 255, 0.8);
+            --easing: cubic-bezier(0.16, 1, 0.3, 1);
+            --border: rgba(15, 23, 42, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            cursor: default;
+        }
+
+        a, button, .wheel-card, .magnetic { cursor: pointer; }
+
+        .bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background-image: radial-gradient(circle at 2px 2px, rgba(15, 23, 42, 0.03) 1px, transparent 0);
+            background-size: 40px 40px;
+        }
+
+        .glow {
+            position: fixed;
+            width: 50vw;
+            height: 50vw;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            filter: blur(100px);
+            background: radial-gradient(circle, rgba(79, 70, 226, 0.05) 0%, transparent 70%);
+        }
+        .glow-1 { top: -15%; right: -10%; }
+        .glow-2 { bottom: -15%; left: -10%; background: rgba(14, 165, 233, 0.04); }
+
+        header {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 40px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            transition: 0.6s var(--easing);
+        }
+
+        header.scrolled {
+            padding: 20px 8%;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo { 
+            font-size: 1.6rem; 
+            font-weight: 800; 
+            text-decoration: none; 
+            color: var(--text); 
+            letter-spacing: -1.5px; 
+            text-transform: lowercase;
+        }
+        .logo span { color: var(--primary); }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 8%;
+            position: relative;
+        }
+
+        .hero-content { max-width: 800px; position: relative; z-index: 2; }
+        .hero h1 { font-size: clamp(2.5rem, 8vw, 5rem); line-height: 1.1; margin-bottom: 30px; font-weight: 800; letter-spacing: -3px; }
+        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 580px; margin-bottom: 45px; }
+
+        .btn {
+            padding: 18px 45px;
+            background: var(--text);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.6s var(--easing);
+            border: none;
+        }
+        .btn:hover { background: var(--primary); transform: translateY(-5px); box-shadow: 0 15px 35px rgba(79, 70, 226, 0.2); }
+
+        .wheel-section {
+            height: 120vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            perspective: 2000px;
+            background: radial-gradient(circle at center, rgba(79, 70, 226, 0.02) 0%, transparent 80%);
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 400px;
+            height: 480px;
+            transform-style: preserve-3d;
+            transition: transform 0.1s linear;
+        }
+
+        .wheel-card {
+            position: absolute;
+            inset: 0;
+            background: white;
+            backdrop-filter: blur(15px);
+            border-radius: 32px;
+            border: 1px solid var(--border);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            backface-visibility: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.03);
+            transition: 0.6s var(--easing);
+        }
+        .wheel-card i { font-size: 3rem; color: var(--primary); margin-bottom: 25px; }
+        .wheel-card h3 { font-size: 1.6rem; font-weight: 800; margin-bottom: 12px; }
+        .wheel-card p { color: var(--text-muted); font-size: 1rem; line-height: 1.5; }
+
+        .plate-container {
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            perspective: 2500px;
+            right: 8%;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .data-plate {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 60px;
+            position: relative;
+            transform-style: preserve-3d;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.05);
+        }
+
+        .corner-data {
+            position: absolute;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.04);
+            border: 1px solid var(--border);
+            font-weight: 700;
+            transition: 0.6s var(--easing);
+            text-align: center;
+        }
+        .corner-data:hover { transform: scale(1.1) translateZ(50px); border-color: var(--primary); }
+        .c-1 { top: -15px; left: -15px; }
+        .c-2 { top: -15px; right: -15px; }
+        .c-3 { bottom: -15px; left: -15px; }
+        .c-4 { bottom: -15px; right: -15px; }
+
+        .data-val { display: block; font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+
+        .ticker {
+            padding: 60px 0;
+            background: var(--text);
+            color: white;
+            overflow: hidden;
+            transform: rotate(-1deg);
+            margin: 60px 0;
+            font-weight: 800;
+        }
+
+        .ticker-track { display: flex; width: max-content; animation: scroll 60s linear infinite; }
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .ticker-item { font-size: 4rem; padding: 0 60px; letter-spacing: -3px; }
+
+        footer {
+            padding: 100px 8% 60px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-credit {
+            margin-top: 40px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .footer-credit span { color: var(--primary); }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 40px;
+        }
+        .social-links a { font-size: 1.8rem; color: var(--text-muted); transition: 0.3s; }
+        .social-links a:hover { color: var(--primary); transform: translateY(-8px); }
+
+        @media (max-width: 1150px) {
+            .plate-container { display: none; }
+            .hero { text-align: center; justify-content: center; }
+            .hero p { margin: 0 auto 40px; }
+            .wheel-container { width: 320px; height: 420px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-canvas"></div>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <header id="navbar">
+        <a href="#" class="logo">srkwebapp <span>2026</span></a>
+        <a href="#contact" class="btn" style="padding: 12px 30px; font-size: 0.85rem; background: var(--primary);">Contact us</a>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1 id="hero-title">We make apps and websites that are easy to use.</h1>
+                <p>We are a small team that builds fast and simple digital products. We care about the small details and making things work perfectly for you.</p>
+                <div style="display: flex; gap: 20px; justify-content: inherit;">
+                    <a href="#contact" class="btn">Get started</a>
+                    <a href="#services" style="text-decoration: none; color: var(--text); font-weight: 750; display: flex; align-items: center; gap: 10px; font-size: 1.1rem;">Our work <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <div class="plate-container">
+                <div class="data-plate">
+                    <div class="corner-data c-1 magnetic">
+                        <span class="data-val">99%</span>
+                        <span>Working</span>
+                    </div>
+                    <div class="corner-data c-2 magnetic">
+                        <span class="data-val">Fast</span>
+                        <span>Speed</span>
+                    </div>
+                    <div class="corner-data c-3 magnetic">
+                        <span class="data-val">250+</span>
+                        <span>Projects</span>
+                    </div>
+                    <div class="corner-data c-4 magnetic">
+                        <span class="data-val">2026</span>
+                        <span>Modern Tech</span>
+                    </div>
+                    <div style="font-size: 4rem; color: var(--primary); opacity: 0.1;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="wheel-section" id="services">
+            <div class="wheel-container" id="wheel">
+                <div class="wheel-card">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Phone Apps</h3>
+                    <p>We build simple apps for your phone that work great every time.</p>
+                </div>
+                <div class="wheel-card">
+                    <i class="fas fa-laptop-code"></i>
+                    <h3>Websites</h3>
+                    <p>We build fast websites that help your business reach more people.</p>
+                </div>
+                <div class="wheel-card">
+                    <i class="fas fa-heart"></i>
+                    <h3>Good Design</h3>
+                    <p>We make things look clean and easy to find, so you don't get lost.</p>
+                </div>
+                <div class="wheel-card">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                    <h3>Ready for More</h3>
+                    <p>Our code is built to stay fast even as your business gets bigger.</p>
+                </div>
+                <div class="wheel-card">
+                    <i class="fas fa-smile"></i>
+                    <h3>We're Here to Help</h3>
+                    <p>If you have a problem, we are here to talk and fix it quickly.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="ticker">
+            <div class="ticker-track">
+                <div class="ticker-item">CLEAN DESIGN</div>
+                <div class="ticker-item">FAST APPS</div>
+                <div class="ticker-item">EASY TO USE</div>
+                <div class="ticker-item">SIMPLE TECH</div>
+                <div class="ticker-item">CLEAN DESIGN</div>
+                <div class="ticker-item">FAST APPS</div>
+                <div class="ticker-item">EASY TO USE</div>
+                <div class="ticker-item">SIMPLE TECH</div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="logo">srkwebapp <span>2026</span></div>
+        <div class="footer-credit">
+            Created by <span>DEEpanshu</span> in 2026
+        </div>
+        <div class="social-links">
+            <a href="https://www.linkedin.com/in/iamdeepanshukumar" target="_blank"><i class="fab fa-linkedin"></i></a>
+            <a href="https://www.instagram.com/iamdeepanshukumar/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-github"></i></a>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const wheel = document.getElementById('wheel');
+            const cards = document.querySelectorAll('.wheel-card');
+            const plate = document.querySelector('.data-plate');
+            const navbar = document.getElementById('navbar');
+            
+            const totalCards = cards.length;
+            const radius = window.innerWidth > 1150 ? 550 : 400;
+            const angleStep = 360 / totalCards;
+            let currentRotation = 0;
+
+            cards.forEach((card, i) => {
+                card.style.transform = `rotateY(${i * angleStep}deg) translateZ(${radius}px)`;
+            });
+
+            function updateWheel() {
+                currentRotation += 0.08;
+                wheel.style.transform = `rotateY(${currentRotation}deg)`;
+                requestAnimationFrame(updateWheel);
+            }
+            updateWheel();
+
+            document.addEventListener('mousemove', (e) => {
+                if (plate) {
+                    const tiltX = (window.innerWidth / 2 - e.pageX) / 45;
+                    const tiltY = (window.innerHeight / 2 - e.pageY) / 45;
+                    plate.style.transform = `rotateY(${tiltX}deg) rotateX(${tiltY}deg)`;
+                }
+            });
+
+            const magnetics = document.querySelectorAll('.magnetic, a, button');
+            magnetics.forEach(el => {
+                el.addEventListener('mousemove', (e) => {
+                    const rect = el.getBoundingClientRect();
+                    const x = (e.clientX - rect.left - rect.width / 2) * 0.3;
+                    const y = (e.clientY - rect.top - rect.height / 2) * 0.3;
+                    el.style.transform = `translate(${x}px, ${y}px)`;
+                });
+                el.addEventListener('mouseleave', () => {
+                    el.style.transform = 'translate(0, 0)';
+                });
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.animate([
+                            { opacity: 0, transform: 'translateY(40px)' },
+                            { opacity: 1, transform: 'translateY(0)' }
+                        ], { duration: 1200, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' });
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('section, footer').forEach(el => observer.observe(el));
+
+            window.addEventListener('scroll', () => {
+                navbar.classList.toggle('scrolled', window.scrollY > 80);
+            });
+        });
+    </script>
+</body>
+</html>
