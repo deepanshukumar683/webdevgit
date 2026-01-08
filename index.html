@@ -15,7 +15,7 @@
             --card-bg: rgba(255, 255, 255, 0.8);
             --text: #0F172A;
             --text-muted: #64748B;
-            --glass: rgba(255, 255, 255, 0.8);
+            --glass: rgba(255, 255, 255, 0.7);
             --easing: cubic-bezier(0.16, 1, 0.3, 1);
             --border: rgba(15, 23, 42, 0.08);
         }
@@ -61,7 +61,8 @@
 
         header {
             position: fixed;
-            top: 0; width: 100%;
+            top: 0; 
+            width: 100%;
             padding: 40px 8%;
             display: flex;
             justify-content: space-between;
@@ -78,12 +79,14 @@
         }
 
         .logo { 
-            font-size: 1.6rem; 
+            font-size: 1.5rem; 
             font-weight: 800; 
             text-decoration: none; 
             color: var(--text); 
-            letter-spacing: -1.5px; 
-            text-transform: lowercase;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
         .logo span { color: var(--primary); }
 
@@ -135,7 +138,7 @@
         .wheel-card {
             position: absolute;
             inset: 0;
-            background: white;
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(15px);
             border-radius: 32px;
             border: 1px solid var(--border);
@@ -166,7 +169,7 @@
         .data-plate {
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(30px);
             border: 1px solid rgba(255, 255, 255, 0.8);
             border-radius: 60px;
@@ -178,15 +181,21 @@
         .corner-data {
             position: absolute;
             padding: 15px 20px;
-            background: white;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
             border-radius: 18px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.04);
-            border: 1px solid var(--border);
+            border: 1px solid rgba(255, 255, 255, 0.5);
             font-weight: 700;
             transition: 0.6s var(--easing);
             text-align: center;
+            min-width: 120px;
         }
-        .corner-data:hover { transform: scale(1.1) translateZ(50px); border-color: var(--primary); }
+        .corner-data:hover { 
+            transform: scale(1.1) translateZ(50px); 
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.85);
+        }
         .c-1 { top: -15px; left: -15px; }
         .c-2 { top: -15px; right: -15px; }
         .c-3 { bottom: -15px; left: -15px; }
@@ -248,7 +257,7 @@
     <div class="glow glow-2"></div>
 
     <header id="navbar">
-        <a href="#" class="logo">srkwebapp <span>2026</span></a>
+        <a href="#" class="logo">SRKWebApp <span>2026</span></a>
         <a href="#contact" class="btn" style="padding: 12px 30px; font-size: 0.85rem; background: var(--primary);">Contact us</a>
     </header>
 
@@ -281,7 +290,7 @@
                         <span class="data-val">2026</span>
                         <span>Modern Tech</span>
                     </div>
-                    <div style="font-size: 4rem; color: var(--primary); opacity: 0.1;">
+                    <div style="font-size: 4rem; color: var(--primary); opacity: 0.1; display: flex; align-items: center; justify-content: center; height: 100%;">
                         <i class="fas fa-check-circle"></i>
                     </div>
                 </div>
@@ -333,7 +342,7 @@
     </main>
 
     <footer>
-        <div class="logo">srkwebapp <span>2026</span></div>
+        <div class="logo" style="justify-content: center; margin-bottom: 20px;">SRKWebApp <span>2026</span></div>
         <div class="footer-credit">
             Created by <span>DEEpanshu</span> in 2026
         </div>
@@ -360,12 +369,22 @@
                 card.style.transform = `rotateY(${i * angleStep}deg) translateZ(${radius}px)`;
             });
 
-            function updateWheel() {
-                currentRotation += 0.08;
+            window.addEventListener('wheel', (e) => {
+                const scrollFactor = 0.1;
+                currentRotation += e.deltaY * scrollFactor;
                 wheel.style.transform = `rotateY(${currentRotation}deg)`;
-                requestAnimationFrame(updateWheel);
-            }
-            updateWheel();
+            });
+
+            let startX = 0;
+            window.addEventListener('touchstart', e => {
+                startX = e.touches[0].clientX;
+            });
+            window.addEventListener('touchmove', e => {
+                const delta = e.touches[0].clientX - startX;
+                currentRotation -= delta * 0.2;
+                wheel.style.transform = `rotateY(${currentRotation}deg)`;
+                startX = e.touches[0].clientX;
+            });
 
             document.addEventListener('mousemove', (e) => {
                 if (plate) {
